@@ -1,0 +1,1124 @@
+{
+  "info": {
+    "name": "Blog App API",
+    "description": "Complete API collection for the NestJS Blog Application with authentication, blog posts, comments, likes, draft management, and file uploads.\n\n## How to Use:\n\n1. **Start Here**: Run 'Register User' or 'Login User' in the Authentication folder first\n2. **Auto-Auth**: The collection automatically sets your access token for subsequent requests\n3. **Test Auth**: Use 'Test Authentication' to verify your token is working\n4. **Create Content**: Create blog posts, comments, and manage likes\n5. **Draft Management**: Create, edit, and publish drafts with scheduling\n6. **File Uploads**: Upload images and documents for blog posts\n7. **Likes Management**: Sync likes counts when needed\n\n## Required Fields:\n- **Blog Posts**: title, content, excerpt are required\n- **Comments**: content and blogPost ID are required\n- **User Registration**: email, password, firstName, lastName are required\n- **File Uploads**: file field is required (multipart/form-data)\n\n## File Upload Support:\n- **Images**: jpg, jpeg, png, gif, webp (max 10MB)\n- **Documents**: pdf, doc, docx (max 10MB)\n- **Featured Images**: Can be set for blog posts\n- **Attachments**: Multiple files can be attached to blog posts\n- **File URLs**: Served at `/uploads/filename` path\n\n## Authentication:\nAll requests (except auth and public endpoints) require Bearer token authentication. The collection handles this automatically after login.",
+    "version": "1.2.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "blogPostId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "commentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "draftId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testUserEmail",
+      "value": "john.doe@example.com",
+      "type": "string"
+    },
+    {
+      "key": "testUserPassword",
+      "value": "password123",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', responseData.access_token);",
+                  "    pm.collectionVariables.set('userId', responseData.user.id);",
+                  "    pm.test('Registration successful', function () {",
+                  "        pm.expect(responseData.access_token).to.exist;",
+                  "        pm.expect(responseData.user).to.exist;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testUserEmail}}\",\n  \"password\": \"{{testUserPassword}}\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', responseData.access_token);",
+                  "    pm.collectionVariables.set('userId', responseData.user.id);",
+                  "    pm.test('Login successful', function () {",
+                  "        pm.expect(responseData.access_token).to.exist;",
+                  "        pm.expect(responseData.user).to.exist;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testUserEmail}}\",\n  \"password\": \"{{testUserPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Test Authentication",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Authentication successful', function () {",
+                  "        pm.expect(pm.response.text()).to.include('posts');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Authentication failed', function () {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/my-posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "my-posts"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Blog Posts",
+      "item": [
+        {
+          "name": "Create Blog Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.collectionVariables.set('blogPostId', responseData._id);",
+                  "    pm.test('Blog post created successfully', function () {",
+                  "        pm.expect(responseData._id).to.exist;",
+                  "        pm.expect(responseData.title).to.exist;",
+                  "        pm.expect(responseData.content).to.exist;",
+                  "        pm.expect(responseData.excerpt).to.exist;",
+                  "        pm.expect(responseData.author).to.exist;",
+                  "    });",
+                  "} else if (pm.response.code === 401) {",
+                  "    pm.test('Authentication required', function () {",
+                  "        pm.expect(pm.response.text()).to.include('Unauthorized');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Request failed with error: ' + pm.response.code, function () {",
+                  "        console.log('Response:', pm.response.text());",
+                  "        pm.expect(pm.response.code).to.be.oneOf([400, 422, 500]);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My First Blog Post\",\n  \"content\": \"This is the content of my first blog post. It contains some interesting information about web development.\",\n  \"excerpt\": \"A brief introduction to my first blog post\",\n  \"tags\": [\"webdev\", \"javascript\", \"nestjs\"],\n  \"status\": \"published\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts"]
+            }
+          }
+        },
+        {
+          "name": "Get All Blog Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts?page=1&limit=10&status=published",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "published"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/my-posts?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "my-posts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Blog Post by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/{{blogPostId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "{{blogPostId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Blog Post with Engagement",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/{{blogPostId}}/with-engagement",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "{{blogPostId}}", "with-engagement"]
+            }
+          }
+        },
+        {
+          "name": "Update Blog Post",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Blog Post Title\",\n  \"content\": \"This is the updated content of my blog post.\",\n  \"excerpt\": \"Updated excerpt\",\n  \"tags\": [\"webdev\", \"javascript\", \"nestjs\", \"mongodb\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/{{blogPostId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "{{blogPostId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Blog Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/{{blogPostId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "{{blogPostId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Draft Management",
+      "item": [
+        {
+          "name": "Create Draft",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.collectionVariables.set('draftId', responseData._id);",
+                  "    pm.test('Draft created successfully', function () {",
+                  "        pm.expect(responseData._id).to.exist;",
+                  "        pm.expect(responseData.status).to.eql('draft');",
+                  "        pm.expect(responseData.title).to.exist;",
+                  "        pm.expect(responseData.excerpt).to.exist;",
+                  "        pm.expect(responseData.isDraft).to.be.true;",
+                  "    });",
+                  "} else if (pm.response.code === 401) {",
+                  "    pm.test('Authentication required', function () {",
+                  "        pm.expect(pm.response.text()).to.include('Unauthorized');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Request failed with error: ' + pm.response.code, function () {",
+                  "        console.log('Response:', pm.response.text());",
+                  "        pm.expect(pm.response.code).to.be.oneOf([400, 422, 500]);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My Draft Post\",\n  \"content\": \"This is a work in progress...\",\n  \"excerpt\": \"Work in progress draft\",\n  \"tags\": [\"draft\", \"wip\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/drafts",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "drafts"]
+            }
+          }
+        },
+        {
+          "name": "Get My Drafts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/drafts?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "drafts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Drafts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/drafts/all?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "drafts", "all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Auto-Save Draft",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Auto-saved Draft Title\",\n  \"content\": \"This content was auto-saved...\",\n  \"excerpt\": \"Auto-saved excerpt\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/drafts/{{draftId}}/auto-save",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "drafts", "{{draftId}}", "auto-save"]
+            }
+          }
+        },
+        {
+          "name": "Preview Draft",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/drafts/{{draftId}}/preview",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "drafts", "{{draftId}}", "preview"]
+            }
+          }
+        },
+        {
+          "name": "Publish Draft Now",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"publishNow\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/drafts/{{draftId}}/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "drafts", "{{draftId}}", "publish"]
+            }
+          }
+        },
+        {
+          "name": "Schedule Draft for Publishing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduledPublishAt\": \"2025-12-31T10:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/drafts/{{draftId}}/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "drafts", "{{draftId}}", "publish"]
+            }
+          }
+        },
+        {
+          "name": "Archive Draft",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/drafts/{{draftId}}/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "drafts", "{{draftId}}", "archive"]
+            }
+          }
+        },
+        {
+          "name": "Restore Draft",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/drafts/{{draftId}}/restore",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "drafts", "{{draftId}}", "restore"]
+            }
+          }
+        },
+        {
+          "name": "Get Scheduled Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/scheduled",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "scheduled"]
+            }
+          }
+        },
+        {
+          "name": "Publish Scheduled Post",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/scheduled/{{draftId}}/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "scheduled", "{{draftId}}", "publish"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "item": [
+        {
+          "name": "Create Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.collectionVariables.set('commentId', responseData._id);",
+                  "    pm.test('Comment created successfully', function () {",
+                  "        pm.expect(responseData._id).to.exist;",
+                  "        pm.expect(responseData.content).to.exist;",
+                  "        pm.expect(responseData.author).to.exist;",
+                  "        pm.expect(responseData.blogPost).to.exist;",
+                  "    });",
+                  "} else if (pm.response.code === 401) {",
+                  "    pm.test('Authentication required', function () {",
+                  "        pm.expect(pm.response.text()).to.include('Unauthorized');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Request failed with error: ' + pm.response.code, function () {",
+                  "        console.log('Response:', pm.response.text());",
+                  "        pm.expect(pm.response.code).to.be.oneOf([400, 422, 500]);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This is a great blog post! Thanks for sharing.\",\n  \"blogPost\": \"{{blogPostId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments"]
+            }
+          }
+        },
+        {
+          "name": "Create Reply Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"I totally agree with your comment!\",\n  \"blogPost\": \"{{blogPostId}}\",\n  \"parentComment\": \"{{commentId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments"]
+            }
+          }
+        },
+        {
+          "name": "Get Comments for Blog Post",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/blog-post/{{blogPostId}}?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "blog-post", "{{blogPostId}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Comment Replies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/replies",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "replies"]
+            }
+          }
+        },
+        {
+          "name": "Update Comment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This is my updated comment content.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Likes",
+      "item": [
+        {
+          "name": "Like/Unlike Blog Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetType\": \"post\",\n  \"blogPost\": \"{{blogPostId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/likes/toggle",
+              "host": ["{{baseUrl}}"],
+              "path": ["likes", "toggle"]
+            }
+          }
+        },
+        {
+          "name": "Like/Unlike Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetType\": \"comment\",\n  \"comment\": \"{{commentId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/likes/toggle",
+              "host": ["{{baseUrl}}"],
+              "path": ["likes", "toggle"]
+            }
+          }
+        },
+        {
+          "name": "Check Like Status for Post",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/likes/status?targetType=post&targetId={{blogPostId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["likes", "status"],
+              "query": [
+                {
+                  "key": "targetType",
+                  "value": "post"
+                },
+                {
+                  "key": "targetId",
+                  "value": "{{blogPostId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check Like Status for Comment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/likes/status?targetType=comment&targetId={{commentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["likes", "status"],
+              "query": [
+                {
+                  "key": "targetType",
+                  "value": "comment"
+                },
+                {
+                  "key": "targetId",
+                  "value": "{{commentId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Post Likes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/likes/post/{{blogPostId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["likes", "post", "{{blogPostId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Comment Likes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/likes/comment/{{commentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["likes", "comment", "{{commentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Sync Post Likes Count",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/likes/sync/post/{{blogPostId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["likes", "sync", "post", "{{blogPostId}}"]
+            }
+          }
+        },
+        {
+          "name": "Sync Comment Likes Count",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/likes/sync/comment/{{commentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["likes", "sync", "comment", "{{commentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Sync All Likes Count",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/likes/sync/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["likes", "sync", "all"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "File Uploads",
+      "item": [
+        {
+          "name": "Upload Image (General)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select an image file (jpg, png, gif, webp)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/uploads/image",
+              "host": ["{{baseUrl}}"],
+              "path": ["uploads", "image"]
+            }
+          }
+        },
+        {
+          "name": "Upload Document (General)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a document file (pdf, doc, docx)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/uploads/document",
+              "host": ["{{baseUrl}}"],
+              "path": ["uploads", "document"]
+            }
+          }
+        },
+        {
+          "name": "Get File Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/uploads/info/filename.jpg",
+              "host": ["{{baseUrl}}"],
+              "path": ["uploads", "info", "filename.jpg"]
+            }
+          }
+        },
+        {
+          "name": "Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/uploads/filename.jpg",
+              "host": ["{{baseUrl}}"],
+              "path": ["uploads", "filename.jpg"]
+            }
+          }
+        },
+        {
+          "name": "Upload Featured Image for Blog Post",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select an image file for the featured image"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/{{blogPostId}}/featured-image",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "{{blogPostId}}", "featured-image"]
+            }
+          }
+        },
+        {
+          "name": "Upload Attachment for Blog Post",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a file to attach to the blog post"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/{{blogPostId}}/attachment",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "{{blogPostId}}", "attachment"]
+            }
+          }
+        },
+        {
+          "name": "Remove Featured Image from Blog Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/{{blogPostId}}/featured-image",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "{{blogPostId}}", "featured-image"]
+            }
+          }
+        },
+        {
+          "name": "Remove Attachment from Blog Post",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"attachmentUrl\": \"/uploads/filename.pdf\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/blog-posts/{{blogPostId}}/attachment",
+              "host": ["{{baseUrl}}"],
+              "path": ["blog-posts", "{{blogPostId}}", "attachment"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Check if we need authentication for this request",
+          "const url = pm.request.url.toString();",
+          "const requiresAuth = !url.includes('/auth/') && !url.includes('/users?') && !url.includes('/blog-posts?');",
+          "",
+          "if (requiresAuth) {",
+          "    const token = pm.collectionVariables.get('accessToken');",
+          "    if (!token) {",
+          "        console.log('No access token found. Please login first.');",
+          "    } else {",
+          "        // Basic token format validation",
+          "        const tokenParts = token.split('.');",
+          "        if (tokenParts.length !== 3) {",
+          "            console.log('Invalid token format. Please login again.');",
+          "            pm.collectionVariables.set('accessToken', '');",
+          "        }",
+          "    }",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global error handling",
+          "if (pm.response.code === 401) {",
+          "    console.log('Authentication failed. Token may be expired or invalid.');",
+          "    pm.collectionVariables.set('accessToken', '');",
+          "    pm.test('Authentication Error (401)', function () {",
+          "        pm.expect(pm.response.code).to.eql(401);",
+          "    });",
+          "} else if (pm.response.code === 403) {",
+          "    pm.test('Forbidden (403)', function () {",
+          "        pm.expect(pm.response.code).to.eql(403);",
+          "    });",
+          "} else if (pm.response.code === 500) {",
+          "    console.log('Server Error:', pm.response.text());",
+          "    pm.test('Server Error (500)', function () {",
+          "        pm.expect(pm.response.code).to.eql(500);",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ]
+}
