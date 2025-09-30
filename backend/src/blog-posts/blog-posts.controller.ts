@@ -20,6 +20,7 @@ import { UpdateBlogPostDto } from './dto/update-blog-post.dto';
 import { CreateDraftDto } from './dto/create-draft.dto';
 import { AutoSaveDraftDto } from './dto/auto-save-draft.dto';
 import { PublishDraftDto } from './dto/publish-draft.dto';
+import { SearchBlogPostsDto } from './dto/search-blog-posts.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UploadsService } from '../uploads/uploads.service';
 import { MulterFile } from '../types/multer.types';
@@ -45,6 +46,11 @@ export class BlogPostsController {
     @Query('status') status?: string,
   ) {
     return this.blogPostsService.findAll(+page, +limit, status);
+  }
+
+  @Get('search')
+  search(@Query() searchDto: SearchBlogPostsDto) {
+    return this.blogPostsService.search(searchDto);
   }
 
   @Get('my-posts')
@@ -91,6 +97,10 @@ export class BlogPostsController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
+    // Validate that id is a valid ObjectId to prevent matching on routes like 'search'
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      throw new BadRequestException('Invalid post ID format');
+    }
     await this.blogPostsService.incrementViews(id);
     return this.blogPostsService.findOne(id);
   }

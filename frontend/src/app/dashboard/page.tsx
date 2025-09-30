@@ -112,52 +112,52 @@ export default async function DashboardPage() {
 
       {/* Quick Actions */}
       <div className="mb-12">
-        <h2 className="text-2xl font-bold mb-6 text-slate-800 dark:text-slate-200">Quick Actions</h2>
+        <h2 className="text-2xl font-bold mb-6 text-foreground">Quick Actions</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <Link href="/create" className="group">
-            <Card className="transition-all duration-500 hover:shadow-2xl hover:scale-[1.05] cursor-pointer bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 border-violet-200/50 dark:border-violet-700/50">
+            <Card className="transition-all duration-500 hover:shadow-2xl hover:scale-[1.05] cursor-pointer bg-card border-border">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-xl group-hover:shadow-violet-500/25 transition-all duration-500 group-hover:scale-110">
                   <PenTool className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="font-bold mb-2 text-slate-800 dark:text-slate-200 text-lg">Write New Post</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Create a new blog post</p>
+                <h3 className="font-bold mb-2 text-foreground text-lg">Write New Post</h3>
+                <p className="text-sm text-muted-foreground">Create a new blog post</p>
               </CardContent>
             </Card>
           </Link>
 
           <Link href="/dashboard/posts" className="group">
-            <Card className="transition-all duration-500 hover:shadow-2xl hover:scale-[1.05] cursor-pointer bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-emerald-200/50 dark:border-emerald-700/50">
+            <Card className="transition-all duration-500 hover:shadow-2xl hover:scale-[1.05] cursor-pointer bg-card border-border">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-xl group-hover:shadow-emerald-500/25 transition-all duration-500 group-hover:scale-110">
                   <FileText className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="font-bold mb-2 text-slate-800 dark:text-slate-200 text-lg">Manage Posts</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Edit and delete posts</p>
+                <h3 className="font-bold mb-2 text-foreground text-lg">Manage Posts</h3>
+                <p className="text-sm text-muted-foreground">Edit and delete posts</p>
               </CardContent>
             </Card>
           </Link>
 
           <Link href="/dashboard/drafts" className="group">
-            <Card className="transition-all duration-500 hover:shadow-2xl hover:scale-[1.05] cursor-pointer bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200/50 dark:border-amber-700/50">
+            <Card className="transition-all duration-500 hover:shadow-2xl hover:scale-[1.05] cursor-pointer bg-card border-border">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-xl group-hover:shadow-amber-500/25 transition-all duration-500 group-hover:scale-110">
                   <Plus className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="font-bold mb-2 text-slate-800 dark:text-slate-200 text-lg">View Drafts</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Continue writing drafts</p>
+                <h3 className="font-bold mb-2 text-foreground text-lg">View Drafts</h3>
+                <p className="text-sm text-muted-foreground">Continue writing drafts</p>
               </CardContent>
             </Card>
           </Link>
 
           <Link href="/blog" className="group">
-            <Card className="transition-all duration-500 hover:shadow-2xl hover:scale-[1.05] cursor-pointer bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 border-rose-200/50 dark:border-rose-700/50">
+            <Card className="transition-all duration-500 hover:shadow-2xl hover:scale-[1.05] cursor-pointer bg-card border-border">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-pink-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-xl group-hover:shadow-rose-500/25 transition-all duration-500 group-hover:scale-110">
                   <Eye className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="font-bold mb-2 text-slate-800 dark:text-slate-200 text-lg">View All Posts</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Browse published posts</p>
+                <h3 className="font-bold mb-2 text-foreground text-lg">View All Posts</h3>
+                <p className="text-sm text-muted-foreground">Browse published posts</p>
               </CardContent>
             </Card>
           </Link>

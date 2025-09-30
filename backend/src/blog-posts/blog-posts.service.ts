@@ -11,6 +11,7 @@ import { UpdateBlogPostDto } from './dto/update-blog-post.dto';
 import { CreateDraftDto } from './dto/create-draft.dto';
 import { AutoSaveDraftDto } from './dto/auto-save-draft.dto';
 import { PublishDraftDto } from './dto/publish-draft.dto';
+import { SearchBlogPostsDto } from './dto/search-blog-posts.dto';
 import { AppLoggerService } from '../common/logger/logger.service';
 
 @Injectable()
@@ -65,6 +66,42 @@ export class BlogPostsService {
   ): Promise<{ posts: BlogPost[]; total: number }> {
     const skip = (page - 1) * limit;
     const filter = status ? { status } : {};
+
+    const posts = await this.blogPostModel
+      .find(filter)
+      .populate('author', 'firstName lastName email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    const total = await this.blogPostModel.countDocuments(filter);
+
+    return { posts, total };
+  }
+
+  async search(searchDto: SearchBlogPostsDto): Promise<{ posts: BlogPost[]; total: number }> {
+    const page = parseInt(searchDto.page || '1');
+    const limit = parseInt(searchDto.limit || '10');
+    const skip = (page - 1) * limit;
+
+    const filter: any = { status: 'published' };
+
+    // Build search query if search term provided
+    if (searchDto.query && searchDto.query.trim()) {
+      const searchRegex = new RegExp(searchDto.query.trim(), 'i');
+      filter.$or = [
+        { title: searchRegex },
+        { excerpt: searchRegex },
+        { content: searchRegex },
+        { tags: searchRegex },
+      ];
+    }
+
+    // Add tag filter if provided
+    if (searchDto.tags && searchDto.tags.length > 0) {
+      filter.tags = { $in: searchDto.tags };
+    }
 
     const posts = await this.blogPostModel
       .find(filter)

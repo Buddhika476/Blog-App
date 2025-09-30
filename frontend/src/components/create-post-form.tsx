@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ImageUpload } from '@/components/image-upload'
 import { DocumentUpload } from '@/components/document-upload'
+import { RichTextEditor } from '@/components/rich-text-editor'
 import { User } from '@/lib/types'
 import { useRouter } from 'next/navigation'
 import { clientBlogPostsApi } from '@/lib/api'
@@ -143,14 +144,11 @@ export function CreatePostForm({ user }: CreatePostFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="content">Content</Label>
-            <textarea
-              id="content"
+            <RichTextEditor
               value={formData.content}
-              onChange={(e) => handleChange('content', e.target.value)}
+              onChange={(value) => handleChange('content', value)}
               placeholder="Write your post content here..."
-              className="w-full p-3 border rounded-lg resize-none"
-              rows={15}
-              required
+              disabled={isPending}
             />
           </div>
 

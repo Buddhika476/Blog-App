@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { ImageUpload } from '@/components/image-upload'
+import { RichTextEditor } from '@/components/rich-text-editor'
 import { BlogPost } from '@/lib/types'
 import { useRouter } from 'next/navigation'
 
@@ -165,19 +166,12 @@ export function EditPostForm({ post }: EditPostFormProps) {
             <Label htmlFor="content" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               Content
             </Label>
-            <textarea
-              id="content"
+            <RichTextEditor
               value={formData.content}
-              onChange={(e) => handleChange('content', e.target.value)}
+              onChange={(value) => handleChange('content', value)}
               placeholder="Share your thoughts, ideas, and stories..."
-              className="w-full p-4 border-2 border-slate-200 dark:border-slate-700 focus:border-violet-500 dark:focus:border-violet-500 rounded-lg resize-none transition-colors font-mono text-sm bg-white dark:bg-slate-900"
-              rows={18}
-              required
+              disabled={isPending}
             />
-            <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
-              <span>{formData.content.split(/\s+/).filter(Boolean).length} words</span>
-              <span>{formData.content.length} characters</span>
-            </div>
           </div>
 
           <div className="space-y-3">

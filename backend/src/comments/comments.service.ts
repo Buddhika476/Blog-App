@@ -148,18 +148,19 @@ export class CommentsService {
         isDeleted: false,
       })
       .populate('author', 'firstName lastName email')
-      .populate({
-        path: 'replies',
-        populate: {
-          path: 'author',
-          select: 'firstName lastName email',
-        },
-        match: { isDeleted: false },
-      })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .exec();
+
+    // Recursively populate all nested replies
+    const commentsWithReplies = await Promise.all(
+      comments.map(async (comment) => {
+        const commentObj = comment.toObject();
+        commentObj.replies = await this.getNestedReplies(comment._id.toString());
+        return commentObj;
+      })
+    );
 
     const total = await this.commentModel.countDocuments({
       blogPost: new Types.ObjectId(blogPostId),
@@ -167,7 +168,29 @@ export class CommentsService {
       isDeleted: false,
     });
 
-    return { comments, total };
+    return { comments: commentsWithReplies, total };
+  }
+
+  private async getNestedReplies(commentId: string): Promise<any[]> {
+    const replies = await this.commentModel
+      .find({
+        parentComment: new Types.ObjectId(commentId),
+        isDeleted: false,
+      })
+      .populate('author', 'firstName lastName email')
+      .sort({ createdAt: 1 })
+      .lean()
+      .exec();
+
+    // Recursively get replies for each reply
+    const repliesWithNested = await Promise.all(
+      replies.map(async (reply: any) => {
+        reply.replies = await this.getNestedReplies(reply._id.toString());
+        return reply;
+      })
+    );
+
+    return repliesWithNested;
   }
 
   async findReplies(commentId: string): Promise<Comment[]> {
