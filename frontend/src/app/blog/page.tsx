@@ -44,7 +44,7 @@ async function getLikeStatus(postId: string, user: any) {
 
 function BlogPostCard({ post, initialLiked, isAuthenticated }: { post: BlogPost; initialLiked: boolean; isAuthenticated: boolean }) {
   return (
-    <Card className="h-full group hover:shadow-2xl transition-all duration-500 hover:scale-[1.03] bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50 rounded-2xl overflow-hidden">
+    <Card className="h-full group hover:shadow-2xl transition-all duration-500 hover:scale-[1.03] bg-card backdrop-blur-xl border-border rounded-2xl overflow-hidden">
       <div className="relative overflow-hidden">
         {post.featuredImage ? (
           <div className="relative h-52 overflow-hidden">
@@ -61,20 +61,20 @@ function BlogPostCard({ post, initialLiked, isAuthenticated }: { post: BlogPost;
             </div>
           </div>
         ) : (
-          <div className="h-52 bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 flex items-center justify-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-violet-100/20 via-transparent to-indigo-100/20 dark:from-violet-900/10 dark:to-indigo-900/10"></div>
-            <MessageCircle className="h-16 w-16 text-slate-400 dark:text-slate-500 relative z-10" />
+          <div className="h-52 bg-muted flex items-center justify-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-transparent to-indigo-500/10"></div>
+            <MessageCircle className="h-16 w-16 text-muted-foreground relative z-10" />
           </div>
         )}
       </div>
 
       <CardHeader className="pb-4 pt-6">
-        <CardTitle className="line-clamp-2 text-xl font-bold leading-tight">
-          <Link href={`/blog/${post._id}`} className="hover:text-violet-600 dark:hover:text-violet-400 transition-colors duration-300">
+        <CardTitle className="line-clamp-2 text-xl font-bold leading-tight text-card-foreground">
+          <Link href={`/blog/${post._id}`} className="hover:text-primary transition-colors duration-300">
             {post.title}
           </Link>
         </CardTitle>
-        <CardDescription className="line-clamp-3 text-slate-600 dark:text-slate-400 leading-relaxed mt-2">
+        <CardDescription className="line-clamp-3 leading-relaxed mt-2">
           {post.excerpt}
         </CardDescription>
       </CardHeader>
@@ -86,10 +86,10 @@ function BlogPostCard({ post, initialLiked, isAuthenticated }: { post: BlogPost;
               <User className="h-4 w-4 text-white" />
             </div>
             <div>
-              <span className="font-semibold text-slate-800 dark:text-slate-200 text-sm">
+              <span className="font-semibold text-foreground text-sm">
                 {post.author.firstName} {post.author.lastName}
               </span>
-              <div className="flex items-center space-x-1 text-xs text-slate-500 dark:text-slate-400">
+              <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                 <Calendar className="h-3 w-3" />
                 <span>{new Date(post.publishedAt || post.createdAt).toLocaleDateString()}</span>
               </div>
@@ -99,9 +99,9 @@ function BlogPostCard({ post, initialLiked, isAuthenticated }: { post: BlogPost;
 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-full">
-              <Eye className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
-              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{post.views}</span>
+            <div className="flex items-center space-x-2 px-3 py-1.5 bg-muted rounded-full">
+              <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs font-medium text-muted-foreground">{post.views}</span>
             </div>
             <LikeButton
               targetId={post._id}
@@ -111,9 +111,9 @@ function BlogPostCard({ post, initialLiked, isAuthenticated }: { post: BlogPost;
               isAuthenticated={isAuthenticated}
               variant="compact"
             />
-            <div className="flex items-center space-x-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-full">
+            <div className="flex items-center space-x-2 px-3 py-1.5 bg-muted rounded-full">
               <MessageCircle className="h-3.5 w-3.5 text-emerald-500" />
-              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{post.commentsCount}</span>
+              <span className="text-xs font-medium text-muted-foreground">{post.commentsCount}</span>
             </div>
           </div>
 
@@ -122,13 +122,13 @@ function BlogPostCard({ post, initialLiked, isAuthenticated }: { post: BlogPost;
               {post.tags.slice(0, 1).map((tag) => (
                 <span
                   key={tag}
-                  className="px-3 py-1 bg-gradient-to-r from-violet-100 to-indigo-100 dark:from-violet-900/30 dark:to-indigo-900/30 text-violet-700 dark:text-violet-300 rounded-full text-xs font-medium"
+                  className="px-3 py-1 bg-gradient-to-r from-violet-500 to-indigo-500 text-white rounded-full text-xs font-medium shadow-sm"
                 >
                   {tag}
                 </span>
               ))}
               {post.tags.length > 1 && (
-                <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-full text-xs">
+                <span className="px-2 py-1 bg-muted text-muted-foreground rounded-full text-xs">
                   +{post.tags.length - 1}
                 </span>
               )}
@@ -156,7 +156,7 @@ function Pagination({ pagination }: { pagination: any }) {
       )}
 
       <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold px-4 py-2 rounded-lg bg-gradient-to-r from-violet-100 to-indigo-100 dark:from-violet-900/30 dark:to-indigo-900/30 text-violet-700 dark:text-violet-300">
+        <span className="text-sm font-semibold px-4 py-2 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md">
           Page {page} of {totalPages}
         </span>
       </div>
@@ -193,11 +193,8 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight">
           Explore Stories
         </h1>
-        <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
-          Discover amazing stories, insights, and perspectives from our community of passionate writers
-        </p>
         <div className="mt-8 flex justify-center gap-2">
-          <span className="px-4 py-2 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-full text-sm font-medium">
+          <span className="px-4 py-2 bg-violet-100 dark:bg-violet-900/30 rounded-full text-sm font-medium text-black dark:text-white">
             {pagination.total} {pagination.total === 1 ? 'Post' : 'Posts'}
           </span>
         </div>

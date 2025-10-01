@@ -41,13 +41,15 @@ export function CommentsSection({ blogPostId, initialComments, user }: CommentsS
 
   // Fetch like statuses for all comments when user is available
   useEffect(() => {
-    if (!user) return
+    if (!user || comments.length === 0) return
 
     const fetchLikeStatuses = async () => {
       const allCommentIds = [
-        ...optimisticComments.map(c => c._id),
-        ...optimisticComments.flatMap(c => (c.replies || []).map(r => r._id))
+        ...comments.map(c => c._id),
+        ...comments.flatMap(c => (c.replies || []).map(r => r._id))
       ].filter(id => !id.startsWith('temp-')) // Exclude optimistic comments
+
+      if (allCommentIds.length === 0) return
 
       const statuses: { [commentId: string]: boolean } = {}
 
@@ -70,14 +72,14 @@ export function CommentsSection({ blogPostId, initialComments, user }: CommentsS
     }
 
     fetchLikeStatuses()
-  }, [user, optimisticComments])
+  }, [user, comments])
 
   const handleSubmitComment = async (formData: FormData) => {
     const content = formData.get('content') as string
     if (!content.trim()) return
 
-    addOptimisticComment(content)
     setNewComment('')
+    addOptimisticComment(content)
 
     startTransition(async () => {
       try {
@@ -95,9 +97,14 @@ export function CommentsSection({ blogPostId, initialComments, user }: CommentsS
         if (response.ok) {
           const newCommentData = await response.json()
           setComments(prev => [...prev, newCommentData])
+        } else {
+          // Revert optimistic update on error
+          setComments(prev => prev)
         }
       } catch (error) {
         console.error('Failed to post comment:', error)
+        // Revert optimistic update on error
+        setComments(prev => prev)
       }
     })
   }

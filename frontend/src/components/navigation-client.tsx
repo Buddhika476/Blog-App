@@ -5,12 +5,15 @@ import { PenTool, Home, LayoutDashboard, LogOut, LogIn, UserPlus, Search } from 
 import { ThemeToggle } from './theme-toggle'
 import { logout } from '@/lib/auth'
 import { User } from '@/lib/types'
+import { useNotifications } from './toast-container'
 
 interface NavigationClientProps {
   user: User | null
 }
 
 export function NavigationClient({ user }: NavigationClientProps) {
+  const { NotificationBell } = useNotifications()
+
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl shadow-sm">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,7 +35,7 @@ export function NavigationClient({ user }: NavigationClientProps) {
           <div className="flex items-center space-x-2">
             <Link
               href="/"
-              className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-foreground hover:bg-accent hover:text-primary transition-all duration-200"
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-foreground hover:bg-gradient-to-r hover:from-violet-50 hover:to-indigo-50 dark:hover:from-violet-900/20 dark:hover:to-indigo-900/20 hover:text-violet-600 dark:hover:text-violet-400 transition-all duration-200 hover:scale-105 active:scale-95"
             >
               <Home className="h-4 w-4" />
               <span className="hidden sm:inline">Home</span>
@@ -40,7 +43,7 @@ export function NavigationClient({ user }: NavigationClientProps) {
 
             <Link
               href="/search"
-              className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-foreground hover:bg-accent hover:text-primary transition-all duration-200"
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-foreground hover:bg-gradient-to-r hover:from-violet-50 hover:to-indigo-50 dark:hover:from-violet-900/20 dark:hover:to-indigo-900/20 hover:text-violet-600 dark:hover:text-violet-400 transition-all duration-200 hover:scale-105 active:scale-95"
             >
               <Search className="h-4 w-4" />
               <span className="hidden sm:inline">Search</span>
@@ -48,11 +51,13 @@ export function NavigationClient({ user }: NavigationClientProps) {
 
             <ThemeToggle />
 
+            {user && <NotificationBell />}
+
             {user ? (
               <>
                 <Link
                   href="/dashboard"
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-foreground hover:bg-accent hover:text-primary transition-all duration-200"
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-foreground hover:bg-gradient-to-r hover:from-violet-50 hover:to-indigo-50 dark:hover:from-violet-900/20 dark:hover:to-indigo-900/20 hover:text-violet-600 dark:hover:text-violet-400 transition-all duration-200 hover:scale-105 active:scale-95"
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   <span className="hidden sm:inline">Dashboard</span>

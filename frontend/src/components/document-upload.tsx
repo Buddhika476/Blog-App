@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -25,6 +25,11 @@ export function DocumentUpload({
   const [documents, setDocuments] = useState<Array<{ file?: File; url: string; filename: string }>>(currentDocuments)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Sync documents when currentDocuments changes
+  useEffect(() => {
+    setDocuments(currentDocuments)
+  }, [currentDocuments])
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])

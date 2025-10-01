@@ -34,7 +34,7 @@ export default async function PostsManagementPage() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Manage Posts</h1>
-          <p className="text-muted-foreground">
+          <p className="text-slate-700 dark:text-slate-400">
             View and manage all your blog posts
           </p>
         </div>
@@ -47,7 +47,7 @@ export default async function PostsManagementPage() {
       </div>
 
       {posts.length > 0 ? (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {posts.map((post) => (
             <DashboardPostCard
               key={post._id}
@@ -58,7 +58,7 @@ export default async function PostsManagementPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <p className="text-muted-foreground mb-4">You haven't created any posts yet.</p>
+          <p className="text-slate-700 dark:text-slate-400 mb-4">You haven't created any posts yet.</p>
           <Link href="/create">
             <Button>Create Your First Post</Button>
           </Link>

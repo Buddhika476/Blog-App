@@ -171,7 +171,7 @@ function SearchContent() {
 
         {/* Results */}
         <div>
-            <div className="mb-4 text-muted-foreground">
+            <div className="mb-4 text-slate-700 dark:text-slate-300 font-medium">
               {isLoading ? (
                 'Searching...'
               ) : (
@@ -231,8 +231,8 @@ function SearchContent() {
                             {post.tags.map((tag) => (
                               <Badge
                                 key={tag}
-                                variant="secondary"
-                                className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+                                variant="default"
+                                className="cursor-pointer hover:opacity-80"
                                 onClick={() => toggleTag(tag)}
                               >
                                 {tag}

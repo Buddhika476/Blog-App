@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Upload, X, Image as ImageIcon } from 'lucide-react'
+import { getImageUrl } from '@/lib/utils'
 
 interface ImageUploadProps {
   onImageUploaded?: (url: string, file?: File) => void
@@ -20,9 +21,64 @@ export function ImageUpload({
   className = ""
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false)
-  const [preview, setPreview] = useState<string | null>(currentImage || null)
+  const [preview, setPreview] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Set preview from currentImage on mount/update
+  useEffect(() => {
+    if (currentImage) {
+      const imageUrl = getImageUrl(currentImage) || currentImage
+      setPreview(imageUrl)
+    } else {
+      setPreview(null)
+    }
+  }, [currentImage])
+
+  const resizeImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const img = document.createElement('img')
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d')
+
+          let width = img.width
+          let height = img.height
+          const maxDimension = 1920
+
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = (height / width) * maxDimension
+              width = maxDimension
+            } else {
+              width = (width / height) * maxDimension
+              height = maxDimension
+            }
+          }
+
+          canvas.width = width
+          canvas.height = height
+          ctx?.drawImage(img, 0, 0, width, height)
+
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const resizedFile = new File([blob], file.name, {
+                type: file.type,
+                lastModified: Date.now(),
+              })
+              resolve(resizedFile)
+            } else {
+              resolve(file)
+            }
+          }, file.type, 0.9)
+        }
+        img.src = e.target?.result as string
+      }
+      reader.readAsDataURL(file)
+    })
+  }
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -44,13 +100,16 @@ export function ImageUpload({
     setUploading(true)
 
     try {
+      // Resize image before upload
+      const resizedFile = await resizeImage(file)
+
       // Create preview
-      const previewUrl = URL.createObjectURL(file)
+      const previewUrl = URL.createObjectURL(resizedFile)
       setPreview(previewUrl)
 
       // Upload to server
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', resizedFile)
 
       const response = await fetch('/api/uploads/image', {
         method: 'POST',
@@ -70,7 +129,8 @@ export function ImageUpload({
       console.error('Error uploading image:', error)
       const errorMessage = error.message || 'Failed to upload image'
       setError(errorMessage)
-      setPreview(currentImage || null)
+      const fallbackUrl = currentImage ? (getImageUrl(currentImage) || currentImage) : null
+      setPreview(fallbackUrl)
     } finally {
       setUploading(false)
     }
@@ -89,9 +149,9 @@ export function ImageUpload({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <Label htmlFor="image-upload">{label}</Label>
+      <Label htmlFor="image-upload" className="text-sm font-semibold text-foreground">{label}</Label>
 
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+      <div className="border-2 border-dashed border-border rounded-lg p-6 text-center bg-muted/30">
         {preview ? (
           <div className="relative">
             <img
@@ -111,7 +171,7 @@ export function ImageUpload({
           </div>
         ) : (
           <div className="space-y-4">
-            <ImageIcon className="h-12 w-12 mx-auto text-gray-400" />
+            <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground" />
             <div>
               <Button
                 type="button"

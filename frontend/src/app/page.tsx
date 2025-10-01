@@ -107,7 +107,7 @@ function BlogPostCard({ post, initialLiked, isAuthenticated }: { post: BlogPost;
               {post.tags.slice(0, 1).map((tag) => (
                 <span
                   key={tag}
-                  className="px-3 py-1 bg-gradient-to-r from-violet-100 to-indigo-100 dark:from-violet-900/30 dark:to-indigo-900/30 text-violet-700 dark:text-violet-300 rounded-full text-xs font-medium"
+                  className="px-3 py-1 bg-gradient-to-r from-violet-500 to-indigo-500 text-white rounded-full text-xs font-medium shadow-sm"
                 >
                   {tag}
                 </span>

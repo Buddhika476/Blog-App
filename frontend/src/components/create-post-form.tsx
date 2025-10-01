@@ -11,6 +11,7 @@ import { RichTextEditor } from '@/components/rich-text-editor'
 import { User } from '@/lib/types'
 import { useRouter } from 'next/navigation'
 import { clientBlogPostsApi } from '@/lib/api'
+import { useToast } from '@/components/toast-container'
 
 interface CreatePostFormProps {
   user: User
@@ -24,12 +25,56 @@ export function CreatePostForm({ user }: CreatePostFormProps) {
     tags: '',
     featuredImage: ''
   })
+  const [errors, setErrors] = useState({
+    title: '',
+    excerpt: '',
+    content: ''
+  })
   const [featuredImageFile, setFeaturedImageFile] = useState<File | null>(null)
   const [attachments, setAttachments] = useState<Array<{ file: File; url: string; filename: string }>>([])
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const { showToast } = useToast()
+
+  const validateForm = (): boolean => {
+    const newErrors = {
+      title: '',
+      excerpt: '',
+      content: ''
+    }
+
+    if (!formData.title.trim()) {
+      newErrors.title = 'Title is required'
+    } else if (formData.title.length < 5) {
+      newErrors.title = 'Title must be at least 5 characters'
+    } else if (formData.title.length > 200) {
+      newErrors.title = 'Title must be less than 200 characters'
+    }
+
+    if (!formData.excerpt.trim()) {
+      newErrors.excerpt = 'Excerpt is required'
+    } else if (formData.excerpt.length < 20) {
+      newErrors.excerpt = 'Excerpt must be at least 20 characters'
+    } else if (formData.excerpt.length > 280) {
+      newErrors.excerpt = 'Excerpt must be less than 280 characters'
+    }
+
+    if (!formData.content.trim()) {
+      newErrors.content = 'Content is required'
+    } else if (formData.content.length < 50) {
+      newErrors.content = 'Content must be at least 50 characters'
+    }
+
+    setErrors(newErrors)
+    return !newErrors.title && !newErrors.excerpt && !newErrors.content
+  }
 
   const handleSubmit = async (action: 'draft' | 'publish') => {
+    if (!validateForm()) {
+      showToast('Please fix all validation errors', 'error')
+      return
+    }
+
     startTransition(async () => {
       try {
         const payload = {
@@ -79,15 +124,24 @@ export function CreatePostForm({ user }: CreatePostFormProps) {
           }
         }
 
+        showToast(
+          action === 'publish' ? 'Post published successfully!' : 'Draft saved successfully!',
+          'success'
+        )
         router.push('/dashboard')
       } catch (error) {
         console.error('Error creating post:', error)
+        showToast('Failed to create post. Please try again.', 'error')
       }
     })
   }
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+    // Clear error when user starts typing
+    if (errors[field as keyof typeof errors]) {
+      setErrors(prev => ({ ...prev, [field]: '' }))
+    }
   }
 
   const handleDocumentUpload = (file: File, url: string, filename: string) => {
@@ -105,28 +159,39 @@ export function CreatePostForm({ user }: CreatePostFormProps) {
       <CardContent>
         <div className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">Title *</Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => handleChange('title', e.target.value)}
               placeholder="Enter your post title..."
               required
-              className="text-lg"
+              className={`text-lg ${errors.title ? 'border-red-500' : ''}`}
             />
+            {errors.title && (
+              <p className="text-sm text-red-600 dark:text-red-400">{errors.title}</p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="excerpt">Excerpt</Label>
+            <Label htmlFor="excerpt">Excerpt *</Label>
             <textarea
               id="excerpt"
               value={formData.excerpt}
               onChange={(e) => handleChange('excerpt', e.target.value)}
               placeholder="Brief summary of your post..."
-              className="w-full p-3 border rounded-lg resize-none"
+              className={`w-full p-3 border rounded-lg resize-none ${errors.excerpt ? 'border-red-500' : ''}`}
               rows={3}
               required
             />
+            <div className="flex justify-between items-center">
+              <span className={`text-xs ${formData.excerpt.length > 280 ? 'text-red-600' : 'text-muted-foreground'}`}>
+                {formData.excerpt.length}/280 characters
+              </span>
+            </div>
+            {errors.excerpt && (
+              <p className="text-sm text-red-600 dark:text-red-400">{errors.excerpt}</p>
+            )}
           </div>
 
           <ImageUpload
@@ -143,13 +208,16 @@ export function CreatePostForm({ user }: CreatePostFormProps) {
           />
 
           <div className="space-y-2">
-            <Label htmlFor="content">Content</Label>
+            <Label htmlFor="content">Content *</Label>
             <RichTextEditor
               value={formData.content}
               onChange={(value) => handleChange('content', value)}
               placeholder="Write your post content here..."
               disabled={isPending}
             />
+            {errors.content && (
+              <p className="text-sm text-red-600 dark:text-red-400">{errors.content}</p>
+            )}
           </div>
 
           <div className="space-y-2">

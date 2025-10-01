@@ -7,6 +7,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   // Create logs and uploads directories if they don't exist
@@ -56,11 +57,32 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // Swagger configuration
+  const config = new DocumentBuilder()
+    .setTitle('Blog App API')
+    .setDescription('Blog application REST API documentation')
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
   const port = process.env.PORT || 3001;
   
   await app.listen(port);
   
   appLogger.log(`🚀 Application is running on: http://localhost:${port}`, 'Bootstrap');
+  appLogger.log(`📚 Swagger API Documentation: http://localhost:${port}/api`, 'Bootstrap');
   appLogger.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`, 'Bootstrap');
   appLogger.log(`📊 Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`, 'Bootstrap');
   appLogger.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? 'Configured' : 'Not configured'}`, 'Bootstrap');

@@ -44,12 +44,12 @@ export function CommentItem({
     }
   }
 
-  // Calculate padding based on depth
-  const paddingClass = depth > 0 ? `pl-${Math.min(depth * 4, 16)} border-l-2 border-border` : ''
+  // Calculate padding based on depth with inline style for dynamic values
+  const paddingLeft = depth > 0 ? `${Math.min(depth * 24, 96)}px` : '0'
 
   return (
-    <div className={`${paddingClass} ${depth > 0 ? 'mt-4' : ''}`}>
-      <Card className={`${comment.optimistic ? 'opacity-60' : ''} ${depth > 0 ? 'bg-muted/30' : ''}`}>
+    <div className={`${depth > 0 ? 'mt-4 border-l-2 border-slate-300 dark:border-slate-600' : ''}`} style={{ paddingLeft }}>
+      <Card className={`${comment.optimistic ? 'opacity-60' : ''} ${depth > 0 ? 'bg-slate-100/50 dark:bg-slate-800/30' : ''}`}>
         <CardContent className="pt-6">
           <div className="flex items-start space-x-4">
             <div className="flex-1">

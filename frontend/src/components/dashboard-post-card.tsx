@@ -50,94 +50,120 @@ export function DashboardPostCard({ post, onDelete }: DashboardPostCardProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="flex items-center space-x-2 mb-2">
-              <Link
-                href={`/blog/${currentPost._id}`}
-                className="hover:text-primary"
-              >
-                {currentPost.title}
-              </Link>
-              <Badge
-                variant={currentPost.status === 'published' ? 'default' : 'secondary'}
-              >
+    <Card className="h-full group hover:shadow-2xl transition-all duration-500 hover:scale-[1.03] bg-slate-50 dark:bg-slate-800/80 backdrop-blur-xl border-slate-200/50 dark:border-slate-700/50 rounded-2xl overflow-hidden">
+      <div className="relative">
+        {currentPost.featuredImage ? (
+          <div className="relative h-52 overflow-hidden">
+            <img
+              src={currentPost.featuredImage}
+              alt={currentPost.title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            <div className="absolute top-3 right-3">
+              <Badge variant={currentPost.status === 'published' ? 'default' : 'secondary'}>
                 {currentPost.status}
               </Badge>
-            </CardTitle>
-            <p className="text-muted-foreground line-clamp-2">
-              {currentPost.excerpt}
-            </p>
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-            <Link href={`/edit/${currentPost._id}`}>
-              <Button variant="outline" size="sm">
-                <Edit className="h-4 w-4 mr-1" />
-                Edit
-              </Button>
-            </Link>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              Delete
-            </Button>
+        ) : (
+          <div className="h-52 bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 flex items-center justify-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-100/20 via-transparent to-indigo-100/20 dark:from-violet-900/10 dark:to-indigo-900/10"></div>
+            <MessageCircle className="h-16 w-16 text-slate-400 dark:text-slate-500 relative z-10" />
+            <div className="absolute top-3 right-3">
+              <Badge variant={currentPost.status === 'published' ? 'default' : 'secondary'}>
+                {currentPost.status}
+              </Badge>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <CardHeader className="pb-4 pt-6">
+        <CardTitle className="line-clamp-2 text-xl font-bold leading-tight">
+          <Link href={`/blog/${currentPost._id}`} className="hover:text-violet-600 dark:hover:text-violet-400 transition-colors duration-300">
+            {currentPost.title}
+          </Link>
+        </CardTitle>
+        <p className="text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed mt-2 text-sm">
+          {currentPost.excerpt}
+        </p>
+      </CardHeader>
+
+      <CardContent className="pt-0 pb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-1 text-xs text-slate-500 dark:text-slate-400">
+            <Calendar className="h-3 w-3" />
+            <span>
+              {currentPost.status === 'published'
+                ? new Date(currentPost.publishedAt!).toLocaleDateString()
+                : new Date(currentPost.createdAt).toLocaleDateString()}
+            </span>
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-1">
-              <Calendar className="h-4 w-4" />
-              <span>
-                {currentPost.status === 'published'
-                  ? `Published ${new Date(currentPost.publishedAt!).toLocaleDateString()}`
-                  : `Created ${new Date(currentPost.createdAt).toLocaleDateString()}`
-                }
-              </span>
-            </div>
-          </div>
 
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-1">
-              <Eye className="h-4 w-4" />
-              <span>{currentPost.views}</span>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-full">
+              <Eye className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{currentPost.views}</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <Heart className="h-4 w-4 text-rose-500" />
-              <span className="font-medium">{currentPost.likesCount}</span>
+            <div className="flex items-center space-x-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-full">
+              <Heart className="h-3.5 w-3.5 text-rose-500" />
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{currentPost.likesCount}</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <MessageCircle className="h-4 w-4" />
-              <span>{currentPost.commentsCount}</span>
+            <div className="flex items-center space-x-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-full">
+              <MessageCircle className="h-3.5 w-3.5 text-emerald-500" />
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{currentPost.commentsCount}</span>
             </div>
           </div>
         </div>
 
         {currentPost.tags && currentPost.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-4">
-            {currentPost.tags.map((tag) => (
-              <Badge key={tag} variant="outline">
+          <div className="flex flex-wrap gap-1 mb-4">
+            {currentPost.tags.slice(0, 2).map((tag) => (
+              <span
+                key={tag}
+                className="px-3 py-1 bg-gradient-to-r from-violet-100 to-indigo-100 dark:from-violet-900/30 dark:to-indigo-900/30 text-violet-700 dark:text-violet-300 rounded-full text-xs font-medium"
+              >
                 {tag}
-              </Badge>
+              </span>
             ))}
+            {currentPost.tags.length > 2 && (
+              <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-full text-xs">
+                +{currentPost.tags.length - 2}
+              </span>
+            )}
           </div>
         )}
+
+        <div className="flex items-center gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex-1"
+          >
+            <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Link href={`/edit/${currentPost._id}`} className="flex-1">
+            <Button variant="outline" size="sm" className="w-full">
+              <Edit className="h-4 w-4 mr-1" />
+              Edit
+            </Button>
+          </Link>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="flex-1 text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4 mr-1" />
+            Delete
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
