@@ -55,7 +55,7 @@ export function Toast({ id, message, type, duration = 35000, onClose }: ToastPro
       : 'bg-amber-500 dark:bg-amber-600 border-amber-600 dark:border-amber-700 shadow-xl'
   }
 
-  const textColor = isHovered ? 'text-slate-900 dark:text-slate-200' : 'text-white'
+  const textColor = 'text-white'
 
   return (
     <div
